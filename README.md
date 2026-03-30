@@ -180,10 +180,10 @@ yc vpc security-group create \
   --rule "direction=egress,protocol=icmp,v4-cidrs=0.0.0.0/0"
 
 # Объявляем переменные
-SUBNET_ID=$(yc vpc subnet list --format json | jq -r '.[] | select(.network_id=="enpsl8egule4u96hnl68") | .id')
+SUBNET_ID=$(yc vpc subnet list --format json | jq -r '.[] | select(.network_id=="enp8ptuq0j4spev9sojr") | .id')
 echo "SUBNET_ID: $SUBNET_ID"
 
-SG_ID=enppbb5fbd5n6vgm8ipe
+SG_ID=$(yc vpc security-group list --format json | jq -r '.[] | select(.name=="swarm-sg") | .id')
 echo "SG_ID: $SG_ID"
 
 IMAGE_ID=fd805090je9atk2b9jon
@@ -204,41 +204,46 @@ yc compute instance create \
 yc compute instance list
 
 # Подключаемся
-ssh -i ~/.ssh/id_ed25519 ubuntu@178.154.206.70
+ssh -i ~/.ssh/id_ed25519 ubuntu@178.154.223.146
 
 ```
 
 ![docker-2-task 4-1](img/HW-16-5-4-1.png)
 
-2. Установка Docker Engine на Ubuntu
+2. Установка Docker Engine на Ubuntu (скрипт)
 ```
-Для установки докера потребуется дополнительно загрузить 4 пакета, а именно:
-•	curl — необходим для работы с веб-ресурсами;
-•	software-properties-common — пакет для управления ПО с помощью скриптов;
-•	ca-certificates — содержит информацию о центрах сертификации;
-•	apt-transport-https — необходим для передачи данных по протоколу HTTPS.
+#!/bin/bash
 
-# Add Docker's official GPG key:
+# Установка Docker Engine на Ubuntu
+# Требуемые пакеты: curl, software-properties-common, ca-certificates, apt-transport-https
+
+# Update и установка зависимостей
 sudo apt update
-sudo apt install ca-certificates curl
+sudo apt install -y ca-certificates curl software-properties-common apt-transport-https
+
+# Создать директорию для ключей
 sudo install -m 0755 -d /etc/apt/keyrings
+
+# Добавить официальный GPG-ключ Docker
 sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
 sudo chmod a+r /etc/apt/keyrings/docker.asc
 
-# Add the repository to Apt sources:
+# Добавить репозиторий Docker в источники apt
 echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
   $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt update
-sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
 
-# Для запуск без root
+# Обновить индексы и установить Docker
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# Настройка прав для запуска без sudo
 sudo groupadd docker
 sudo usermod -aG docker $USER
 newgrp docker
 
-# Проверяем
+# Проверка установки
 docker --version
 docker compose version
 ```
@@ -281,6 +286,12 @@ exit;
 4. Зайдите на сайт проверки http подключений, например(или аналогичный)
 
 ![docker-2-task 4-4](img/HW-16-5-4-4.png)
+
+Доработка:
+Видимо в прошлый раз сделал неправильный скрин экрана. Сегодня повторил 4 задание - все есть, скрин прилагается) 
+
+![docker-2-task 4-6](img/HW-16-5-4-6.png)
+
 
 6. Повторите SQL-запрос на сервере и приложите скриншот и ссылку на fork.
 
